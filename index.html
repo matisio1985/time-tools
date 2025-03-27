@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tijd Tools</title>
+
+  <!-- Google AdSense Placeholder -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXX"
+          crossorigin="anonymous"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background: #333;
+      color: #fff;
+      padding: 15px;
+      font-size: 24px;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      background: #444;
+    }
+    nav button {
+      background: #444;
+      color: white;
+      border: none;
+      padding: 15px 20px;
+      cursor: pointer;
+    }
+    nav button:hover, nav button.active {
+      background: #666;
+    }
+    section {
+      display: none;
+      padding: 30px;
+    }
+    section.active {
+      display: block;
+    }
+    .clock, .stopwatch, .countdown, .worldclocks {
+      font-size: 36px;
+      margin-top: 20px;
+    }
+    input, select, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<header>Tijd Tools</header>
+
+<nav>
+  <button class="tab active" data-tab="clock">Digitale Klok</button>
+  <button class="tab" data-tab="stopwatch">Stopwatch</button>
+  <button class="tab" data-tab="world">Wereldklokken</button>
+  <button class="tab" data-tab="countdown">Countdown</button>
+</nav>
+
+<section id="clock" class="active">
+  <div class="clock" id="digitalClock"></div>
+</section>
+
+<section id="stopwatch">
+  <div class="stopwatch" id="stopwatchDisplay">00:00:00</div>
+  <button onclick="startStopwatch()">Start</button>
+  <button onclick="stopStopwatch()">Stop</button>
+  <button onclick="resetStopwatch()">Reset</button>
+</section>
+
+<section id="world">
+  <div class="worldclocks" id="worldClocks"></div>
+</section>
+
+<section id="countdown">
+  <input type="datetime-local" id="countdownInput" />
+  <button onclick="startCountdown()">Start Countdown</button>
+  <div class="countdown" id="countdownDisplay"></div>
+</section>
+
+<script>
+  // Tab-switching
+  document.querySelectorAll(".tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.getElementById(btn.dataset.tab).classList.add("active");
+      btn.classList.add("active");
+    });
+  });
+
+  // Digitale klok
+  function updateClock() {
+    const now = new Date();
+    document.getElementById("digitalClock").textContent = now.toLocaleTimeString();
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Stopwatch
+  let swInterval, swTime = 0;
+  function updateStopwatch() {
+    const h = String(Math.floor(swTime / 3600)).padStart(2, '0');
+    const m = String(Math.floor((swTime % 3600) / 60)).padStart(2, '0');
+    const s = String(swTime % 60).padStart(2, '0');
+    document.getElementById("stopwatchDisplay").textContent = `${h}:${m}:${s}`;
+    swTime++;
+  }
+  function startStopwatch() {
+    if (!swInterval) swInterval = setInterval(updateStopwatch, 1000);
+  }
+  function stopStopwatch() {
+    clearInterval(swInterval);
+    swInterval = null;
+  }
+  function resetStopwatch() {
+    stopStopwatch();
+    swTime = 0;
+    updateStopwatch();
+  }
+
+  // Wereldklokken
+  const timezones = [
+    { city: "New York", tz: "America/New_York" },
+    { city: "London", tz: "Europe/London" },
+    { city: "Tokyo", tz: "Asia/Tokyo" },
+    { city: "Sydney", tz: "Australia/Sydney" },
+  ];
+  function updateWorldClocks() {
+    const container = document.getElementById("worldClocks");
+    container.innerHTML = "";
+    timezones.forEach(loc => {
+      const time = new Date().toLocaleTimeString("nl-NL", { timeZone: loc.tz });
+      container.innerHTML += `<div><strong>${loc.city}</strong>: ${time}</div>`;
+    });
+  }
+  setInterval(updateWorldClocks, 1000);
+  updateWorldClocks();
+
+  // Countdown
+  let countdownInterval;
+  function startCountdown() {
+    clearInterval(countdownInterval);
+    const target = new Date(document.getElementById("countdownInput").value);
+    countdownInterval = setInterval(() => {
+      const now = new Date();
+      const diff = Math.max(0, Math.floor((target - now) / 1000));
+      const h = String(Math.floor(diff / 3600)).padStart(2, '0');
+      const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+      const s = String(diff % 60).padStart(2, '0');
+      document.getElementById("countdownDisplay").textContent = `${h}:${m}:${s}`;
+      if (diff === 0) clearInterval(countdownInterval);
+    }, 1000);
+  }
+</script>
+
+</body>
+</html>
